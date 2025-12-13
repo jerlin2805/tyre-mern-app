@@ -4,6 +4,7 @@ const cors = require('cors');
 require('dotenv').config();
 
 const authRouter = require('./routes/auth');
+const vehiclesRouter = require('./routes/vehicles');
 
 const app = express();
 
@@ -18,6 +19,8 @@ app.get('/', (req, res) => {
 
 // mount auth routes
 app.use('/api/auth', authRouter);
+// mount vehicle routes
+app.use('/api/vehicles', vehiclesRouter);
 
 // connect to mongo and start server
 const PORT = process.env.PORT || 5000;

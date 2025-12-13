@@ -1,23 +1,92 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function AddVehicle() {
   const [vehicleNumber, setVehicleNumber] = useState("");
   const [vehicleType, setVehicleType] = useState("");
   const [brand, setBrand] = useState("");
+  const [registrationNumber, setRegistrationNumber] = useState("");
+  const [registrationExpiry, setRegistrationExpiry] = useState("");
+  const [tyreSize, setTyreSize] = useState("");
+  const [tyreBrand, setTyreBrand] = useState("");
+  const [tyrePressure, setTyrePressure] = useState("");
   const [message, setMessage] = useState("");
+  const [vehicles, setVehicles] = useState([]);
+  const [customType, setCustomType] = useState("");
+
+  const fetchVehicles = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch('http://localhost:5001/api/vehicles', {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) return setVehicles([]);
+      const data = await res.json();
+      setVehicles(data);
+    } catch (err) {
+      console.error(err);
+      setVehicles([]);
+    }
+  };
+
+  // fetch when mounted
+  useEffect(() => {
+    fetchVehicles();
+  }, []);
 
   const handleSubmit = () => {
-    if (!vehicleNumber || !vehicleType || !brand) {
+    // determine final vehicle type (support "Other")
+    const finalType = vehicleType === 'Other' ? customType.trim() : vehicleType;
+
+    if (!vehicleNumber || !finalType || !brand) {
       setMessage("Please fill all the fields");
       return;
     }
 
-    setMessage("Vehicle added successfully 🚗🛞");
+    // send to backend
+    (async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch('http://localhost:5001/api/vehicles', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({
+            vehicleNumber,
+            vehicleType: finalType,
+            brand,
+            registrationNumber,
+            registrationExpiry,
+            tyreSpecs: { size: tyreSize, brand: tyreBrand, pressure: tyrePressure ? Number(tyrePressure) : undefined },
+          }),
+        });
 
-    // clear form
-    setVehicleNumber("");
-    setVehicleType("");
-    setBrand("");
+        if (!res.ok) {
+          const text = await res.text();
+          setMessage('Failed to add vehicle: ' + text);
+          return;
+        }
+
+        const created = await res.json();
+        setMessage('Vehicle added successfully ');
+  // clear form
+  setVehicleNumber('');
+  setVehicleType('');
+  setCustomType('');
+  setBrand('');
+  setRegistrationNumber('');
+  setRegistrationExpiry('');
+  setTyreSize('');
+  setTyreBrand('');
+  setTyrePressure('');
+        // refresh list
+        fetchVehicles();
+      } catch (err) {
+        console.error(err);
+        setMessage('Failed to add vehicle');
+      }
+    })();
   };
 
   return (
@@ -42,7 +111,18 @@ function AddVehicle() {
           <option value="Car">Car</option>
           <option value="Bike">Bike</option>
           <option value="Truck">Truck</option>
+          <option value="Other">Other</option>
         </select>
+
+        {vehicleType === 'Other' && (
+          <input
+            type="text"
+            placeholder="Enter vehicle type"
+            value={customType}
+            onChange={(e) => setCustomType(e.target.value)}
+            style={styles.input}
+          />
+        )}
 
         <input
           type="text"
@@ -52,11 +132,72 @@ function AddVehicle() {
           style={styles.input}
         />
 
+        <input
+          type="text"
+          placeholder="Registration Number"
+          value={registrationNumber}
+          onChange={(e) => setRegistrationNumber(e.target.value)}
+          style={styles.input}
+        />
+
+        <input
+          type="date"
+          placeholder="Registration Expiry"
+          value={registrationExpiry}
+          onChange={(e) => setRegistrationExpiry(e.target.value)}
+          style={styles.input}
+        />
+
+        <input
+          type="text"
+          placeholder="Tyre Size (e.g. 205/55R16)"
+          value={tyreSize}
+          onChange={(e) => setTyreSize(e.target.value)}
+          style={styles.input}
+        />
+
+        <input
+          type="text"
+          placeholder="Tyre Brand"
+          value={tyreBrand}
+          onChange={(e) => setTyreBrand(e.target.value)}
+          style={styles.input}
+        />
+
+        <input
+          type="number"
+          placeholder="Recommended Tyre Pressure (psi)"
+          value={tyrePressure}
+          onChange={(e) => setTyrePressure(e.target.value)}
+          style={styles.input}
+        />
+
         <button style={styles.button} onClick={handleSubmit}>
           Add Vehicle
         </button>
 
         {message && <p style={styles.message}>{message}</p>}
+        <hr style={{ margin: '20px 0' }} />
+        <h3>Your vehicles</h3>
+        {vehicles.length === 0 ? (
+          <p style={{ color: '#666' }}>No vehicles yet.</p>
+        ) : (
+          <ul style={{ textAlign: 'left' }}>
+            {vehicles.map((v) => (
+              <li key={v._id} style={{ marginBottom: 10 }}>
+                <strong>{v.vehicleNumber}</strong> — {v.vehicleType} ({v.brand})
+                {v.registrationNumber && (
+                  <div style={{ fontSize: 12, color: '#555' }}>Reg: {v.registrationNumber} (exp: {v.registrationExpiry ? new Date(v.registrationExpiry).toLocaleDateString() : '—'})</div>
+                )}
+                {v.tyreSpecs && (
+                  <div style={{ fontSize: 12, color: '#555' }}>
+                    Tyre: {v.tyreSpecs.size || '—'} • {v.tyreSpecs.brand || '—'} • {v.tyreSpecs.pressure ? `${v.tyreSpecs.pressure} psi` : '—'}
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );
@@ -106,7 +247,7 @@ const styles = {
     width: "100%",
     padding: "12px",
     marginTop: "10px",
-    background: "#f15a24",
+    background: "#e76995ff",
     color: "#fff",
     border: "none",
     borderRadius: "8px",

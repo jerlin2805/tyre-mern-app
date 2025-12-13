@@ -45,7 +45,7 @@ const handleLogin = async () => {
 
         <input
           type="text"
-          placeholder="Username"
+          placeholder="Email (use admin@example.com)"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           style={styles.input}
