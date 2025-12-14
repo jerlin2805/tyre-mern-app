@@ -1,13 +1,24 @@
 import { Routes, Route } from "react-router-dom";
-import Login from "./pages/login";
-import AddVehicle from "./pages/AddVehicle";
+import Login from "./pages/Login";
 import Vehicles from "./pages/Vehicles";
+import AddVehicle from "./pages/AddVehicle";
+import EditVehicle from "./pages/EditVehicle";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<Login />} />
+
+      <Route
+        path="/vehicles"
+        element={
+          <ProtectedRoute>
+            <Vehicles />
+          </ProtectedRoute>
+        }
+      />
+
       <Route
         path="/add-vehicle"
         element={
@@ -16,11 +27,12 @@ function App() {
           </ProtectedRoute>
         }
       />
+
       <Route
-        path="/vehicles"
+        path="/edit-vehicle/:id"
         element={
           <ProtectedRoute>
-            <Vehicles />
+            <EditVehicle />
           </ProtectedRoute>
         }
       />
