@@ -6,12 +6,11 @@ function AddVehicle() {
   const [brand, setBrand] = useState("");
   const [registrationNumber, setRegistrationNumber] = useState("");
   const [registrationExpiry, setRegistrationExpiry] = useState("");
-  const [tyreSize, setTyreSize] = useState("");
-  const [tyreBrand, setTyreBrand] = useState("");
-  const [tyrePressure, setTyrePressure] = useState("");
+  
   const [message, setMessage] = useState("");
   const [vehicles, setVehicles] = useState([]);
   const [customType, setCustomType] = useState("");
+  const [editingId, setEditingId] = useState(null);
 
   const fetchVehicles = async () => {
     try {
@@ -42,12 +41,14 @@ function AddVehicle() {
       return;
     }
 
-    // send to backend
+    // send to backend (create or update)
     (async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch('http://localhost:5001/api/vehicles', {
-          method: 'POST',
+        const url = editingId ? `http://localhost:5001/api/vehicles/${editingId}` : 'http://localhost:5001/api/vehicles';
+        const method = editingId ? 'PUT' : 'POST';
+        const res = await fetch(url, {
+          method,
           headers: {
             'Content-Type': 'application/json',
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -58,7 +59,6 @@ function AddVehicle() {
             brand,
             registrationNumber,
             registrationExpiry,
-            tyreSpecs: { size: tyreSize, brand: tyreBrand, pressure: tyrePressure ? Number(tyrePressure) : undefined },
           }),
         });
 
@@ -68,8 +68,8 @@ function AddVehicle() {
           return;
         }
 
-        const created = await res.json();
-        setMessage('Vehicle added successfully ');
+  const created = await res.json();
+  setMessage(editingId ? 'Vehicle updated successfully' : 'Vehicle added successfully');
   // clear form
   setVehicleNumber('');
   setVehicleType('');
@@ -77,16 +77,62 @@ function AddVehicle() {
   setBrand('');
   setRegistrationNumber('');
   setRegistrationExpiry('');
-  setTyreSize('');
-  setTyreBrand('');
-  setTyrePressure('');
+  
         // refresh list
         fetchVehicles();
+        // clear editing state
+        setEditingId(null);
       } catch (err) {
         console.error(err);
         setMessage('Failed to add vehicle');
       }
     })();
+  };
+
+  const handleEdit = (v) => {
+    setEditingId(v._id);
+    setVehicleNumber(v.vehicleNumber || '');
+    setVehicleType(v.vehicleType || '');
+    setCustomType('');
+    setBrand(v.brand || '');
+    setRegistrationNumber(v.registrationNumber || '');
+    setRegistrationExpiry(v.registrationExpiry ? new Date(v.registrationExpiry).toISOString().slice(0,10) : '');
+    
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setVehicleNumber('');
+    setVehicleType('');
+    setCustomType('');
+    setBrand('');
+    setRegistrationNumber('');
+    setRegistrationExpiry('');
+    
+    setMessage('');
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`http://localhost:5001/api/vehicles/${id}`, {
+        method: 'DELETE',
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+      if (!res.ok) {
+        const txt = await res.text();
+        setMessage('Delete failed: ' + txt);
+        return;
+      }
+      setMessage('Vehicle deleted');
+      fetchVehicles();
+    } catch (err) {
+      console.error(err);
+      setMessage('Delete failed');
+    }
   };
 
   return (
@@ -148,29 +194,7 @@ function AddVehicle() {
           style={styles.input}
         />
 
-        <input
-          type="text"
-          placeholder="Tyre Size (e.g. 205/55R16)"
-          value={tyreSize}
-          onChange={(e) => setTyreSize(e.target.value)}
-          style={styles.input}
-        />
-
-        <input
-          type="text"
-          placeholder="Tyre Brand"
-          value={tyreBrand}
-          onChange={(e) => setTyreBrand(e.target.value)}
-          style={styles.input}
-        />
-
-        <input
-          type="number"
-          placeholder="Recommended Tyre Pressure (psi)"
-          value={tyrePressure}
-          onChange={(e) => setTyrePressure(e.target.value)}
-          style={styles.input}
-        />
+        {/* Tyre fields removed to simplify form */}
 
         <button style={styles.button} onClick={handleSubmit}>
           Add Vehicle
@@ -189,11 +213,7 @@ function AddVehicle() {
                 {v.registrationNumber && (
                   <div style={{ fontSize: 12, color: '#555' }}>Reg: {v.registrationNumber} (exp: {v.registrationExpiry ? new Date(v.registrationExpiry).toLocaleDateString() : '—'})</div>
                 )}
-                {v.tyreSpecs && (
-                  <div style={{ fontSize: 12, color: '#555' }}>
-                    Tyre: {v.tyreSpecs.size || '—'} • {v.tyreSpecs.brand || '—'} • {v.tyreSpecs.pressure ? `${v.tyreSpecs.pressure} psi` : '—'}
-                  </div>
-                )}
+                {/* Tyre details removed from list view */}
               </li>
             ))}
           </ul>

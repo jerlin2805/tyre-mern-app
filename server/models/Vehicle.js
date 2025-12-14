@@ -9,12 +9,7 @@ const VehicleSchema = new mongoose.Schema(
     // registration info
     registrationNumber: { type: String },
     registrationExpiry: { type: Date },
-    // tyre specifications
-    tyreSpecs: {
-      size: { type: String },
-      brand: { type: String },
-      pressure: { type: Number },
-    },
+    // (tyre specifications removed for simplified UI)
     // optional notes
     notes: { type: String },
   },

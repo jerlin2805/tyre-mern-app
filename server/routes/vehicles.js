@@ -24,7 +24,6 @@ router.post('/', auth, async (req, res) => {
       brand,
       registrationNumber,
       registrationExpiry,
-      tyreSpecs,
       notes,
     } = req.body;
 
@@ -38,7 +37,6 @@ router.post('/', auth, async (req, res) => {
       brand,
       registrationNumber,
       registrationExpiry: registrationExpiry ? new Date(registrationExpiry) : undefined,
-      tyreSpecs,
       notes,
       owner: req.user._id,
     });
