@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from 'react-router-dom';
 
 function AddVehicle() {
   const [vehicleNumber, setVehicleNumber] = useState("");
@@ -31,6 +32,22 @@ function AddVehicle() {
   useEffect(() => {
     fetchVehicles();
   }, []);
+
+  // if navigated here with an edit payload, prefill form
+  const location = useLocation();
+  useEffect(() => {
+    if (location?.state?.editVehicle) {
+      const v = location.state.editVehicle;
+      setEditingId(v._id);
+      setVehicleNumber(v.vehicleNumber || '');
+      setVehicleType(v.vehicleType || '');
+      setCustomType('');
+      setBrand(v.brand || '');
+      setRegistrationNumber(v.registrationNumber || '');
+      setRegistrationExpiry(v.registrationExpiry ? new Date(v.registrationExpiry).toISOString().slice(0,10) : '');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [location]);
 
   const handleSubmit = () => {
     // determine final vehicle type (support "Other")
@@ -201,23 +218,7 @@ function AddVehicle() {
         </button>
 
         {message && <p style={styles.message}>{message}</p>}
-        <hr style={{ margin: '20px 0' }} />
-        <h3>Your vehicles</h3>
-        {vehicles.length === 0 ? (
-          <p style={{ color: '#666' }}>No vehicles yet.</p>
-        ) : (
-          <ul style={{ textAlign: 'left' }}>
-            {vehicles.map((v) => (
-              <li key={v._id} style={{ marginBottom: 10 }}>
-                <strong>{v.vehicleNumber}</strong> — {v.vehicleType} ({v.brand})
-                {v.registrationNumber && (
-                  <div style={{ fontSize: 12, color: '#555' }}>Reg: {v.registrationNumber} (exp: {v.registrationExpiry ? new Date(v.registrationExpiry).toLocaleDateString() : '—'})</div>
-                )}
-                {/* Tyre details removed from list view */}
-              </li>
-            ))}
-          </ul>
-        )}
+        {/* Vehicles list moved to separate page */}
       </div>
     </div>
   );
