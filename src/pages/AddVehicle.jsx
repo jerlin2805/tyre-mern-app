@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from 'react-router-dom';
+import api from '../services/api';
+import Navigation from '../components/Navigation';
 
 function AddVehicle() {
   const [vehicleNumber, setVehicleNumber] = useState("");
@@ -15,13 +17,8 @@ function AddVehicle() {
 
   const fetchVehicles = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:5001/api/vehicles', {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      if (!res.ok) return setVehicles([]);
-      const data = await res.json();
-      setVehicles(data);
+      const res = await api.get('/vehicles');
+      setVehicles(res.data || []);
     } catch (err) {
       console.error(err);
       setVehicles([]);
@@ -61,40 +58,40 @@ function AddVehicle() {
     // send to backend (create or update)
     (async () => {
       try {
-        const token = localStorage.getItem('token');
-        const url = editingId ? `http://localhost:5001/api/vehicles/${editingId}` : 'http://localhost:5001/api/vehicles';
-        const method = editingId ? 'PUT' : 'POST';
-        const res = await fetch(url, {
-          method,
-          headers: {
-            'Content-Type': 'application/json',
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-          body: JSON.stringify({
+        let res;
+        if (editingId) {
+          res = await api.put(`/vehicles/${editingId}`, {
             vehicleNumber,
             vehicleType: finalType,
             brand,
             registrationNumber,
             registrationExpiry,
-          }),
-        });
+          });
+        } else {
+          res = await api.post('/vehicles', {
+            vehicleNumber,
+            vehicleType: finalType,
+            brand,
+            registrationNumber,
+            registrationExpiry,
+          });
+        }
 
-        if (!res.ok) {
-          const text = await res.text();
-          setMessage('Failed to add vehicle: ' + text);
+        if (!res || (res.status && res.status >= 400)) {
+          setMessage('Failed to add/update vehicle');
           return;
         }
 
-  const created = await res.json();
-  setMessage(editingId ? 'Vehicle updated successfully' : 'Vehicle added successfully');
-  // clear form
-  setVehicleNumber('');
-  setVehicleType('');
-  setCustomType('');
-  setBrand('');
-  setRegistrationNumber('');
-  setRegistrationExpiry('');
-  
+        setMessage(editingId ? 'Vehicle updated successfully' : 'Vehicle added successfully');
+
+        // clear form
+        setVehicleNumber('');
+        setVehicleType('');
+        setCustomType('');
+        setBrand('');
+        setRegistrationNumber('');
+        setRegistrationExpiry('');
+
         // refresh list
         fetchVehicles();
         // clear editing state
@@ -132,18 +129,7 @@ function AddVehicle() {
 
   const handleDelete = async (id) => {
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:5001/api/vehicles/${id}`, {
-        method: 'DELETE',
-        headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-      });
-      if (!res.ok) {
-        const txt = await res.text();
-        setMessage('Delete failed: ' + txt);
-        return;
-      }
+      await api.delete(`/vehicles/${id}`);
       setMessage('Vehicle deleted');
       fetchVehicles();
     } catch (err) {
@@ -153,74 +139,80 @@ function AddVehicle() {
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h2 style={styles.title}>Add Vehicle</h2>
+    <>
+      <Navigation />
+      <div style={styles.container}>
+        <div style={styles.card}>
+          <h2 style={styles.title}>Add Vehicle</h2>
 
-        <input
-          type="text"
-          placeholder="Vehicle Number"
-          value={vehicleNumber}
-          onChange={(e) => setVehicleNumber(e.target.value)}
-          style={styles.input}
-        />
-
-        <select
-          value={vehicleType}
-          onChange={(e) => setVehicleType(e.target.value)}
-          style={styles.input}
-        >
-          <option value="">Select Vehicle Type</option>
-          <option value="Car">Car</option>
-          <option value="Bike">Bike</option>
-          <option value="Truck">Truck</option>
-          <option value="Other">Other</option>
-        </select>
-
-        {vehicleType === 'Other' && (
           <input
             type="text"
-            placeholder="Enter vehicle type"
-            value={customType}
-            onChange={(e) => setCustomType(e.target.value)}
+            placeholder="Vehicle Number"
+            value={vehicleNumber}
+            onChange={(e) => setVehicleNumber(e.target.value)}
             style={styles.input}
           />
-        )}
 
-        <input
-          type="text"
-          placeholder="Vehicle Brand"
-          value={brand}
-          onChange={(e) => setBrand(e.target.value)}
-          style={styles.input}
-        />
+          <select
+            value={vehicleType}
+            onChange={(e) => setVehicleType(e.target.value)}
+            style={styles.input}
+          >
+            <option value="">Select Vehicle Type</option>
+            <option value="Car">Car</option>
+            <option value="Bike">Bike</option>
+            <option value="Truck">Truck</option>
+            <option value="Other">Other</option>
+          </select>
 
-        <input
-          type="text"
-          placeholder="Registration Number"
-          value={registrationNumber}
-          onChange={(e) => setRegistrationNumber(e.target.value)}
-          style={styles.input}
-        />
+          {vehicleType === 'Other' && (
+            <input
+              type="text"
+              placeholder="Enter vehicle type"
+              value={customType}
+              onChange={(e) => setCustomType(e.target.value)}
+              style={styles.input}
+            />
+          )}
 
-        <input
-          type="date"
-          placeholder="Registration Expiry"
-          value={registrationExpiry}
-          onChange={(e) => setRegistrationExpiry(e.target.value)}
-          style={styles.input}
-        />
+          <input
+            type="text"
+            placeholder="Vehicle Brand"
+            value={brand}
+            onChange={(e) => setBrand(e.target.value)}
+            style={styles.input}
+          />
 
-        {/* Tyre fields removed to simplify form */}
+          <input
+            type="text"
+            placeholder="Registration Number"
+            value={registrationNumber}
+            onChange={(e) => setRegistrationNumber(e.target.value)}
+            style={styles.input}
+          />
 
-        <button style={styles.button} onClick={handleSubmit}>
-          Add Vehicle
-        </button>
+          <input
+            type="date"
+            placeholder="Registration Expiry"
+            value={registrationExpiry}
+            onChange={(e) => setRegistrationExpiry(e.target.value)}
+            style={styles.input}
+          />
 
-        {message && <p style={styles.message}>{message}</p>}
-        {/* Vehicles list moved to separate page */}
+          <button style={styles.button} onClick={handleSubmit}>
+            {editingId ? 'Update Vehicle' : 'Add Vehicle'}
+          </button>
+
+          {message && <p style={styles.message}>{message}</p>}
+          
+          {editingId && (
+            <button style={styles.cancelButton} onClick={handleCancelEdit}>
+              Cancel Edit
+            </button>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -228,7 +220,7 @@ export default AddVehicle;
 
 const styles = {
   container: {
-    minHeight: "100vh",
+    minHeight: "calc(100vh - 60px)",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
@@ -269,6 +261,19 @@ const styles = {
     padding: "12px",
     marginTop: "10px",
     background: "#e76995ff",
+    color: "#fff",
+    border: "none",
+    borderRadius: "8px",
+    fontSize: "16px",
+    fontWeight: "600",
+    cursor: "pointer",
+  },
+
+  cancelButton: {
+    width: "100%",
+    padding: "12px",
+    marginTop: "10px",
+    background: "#6c757d",
     color: "#fff",
     border: "none",
     borderRadius: "8px",

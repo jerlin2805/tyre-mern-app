@@ -22,8 +22,9 @@ app.use('/api/auth', authRouter);
 // mount vehicle routes
 app.use('/api/vehicles', vehiclesRouter);
 
+
 // connect to mongo and start server
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/nextgen';
 
 mongoose

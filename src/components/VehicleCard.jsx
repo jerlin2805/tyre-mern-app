@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from '../services/api';
 
 function VehicleCard({ vehicle, onDelete }) {
   const navigate = useNavigate();
@@ -9,20 +9,19 @@ function VehicleCard({ vehicle, onDelete }) {
     if (!confirm) return;
 
     try {
-      await axios.delete(
-        `http://localhost:5000/api/vehicles/${vehicle._id}`
-      );
+      await api.delete(`/vehicles/${vehicle._id}`);
       onDelete(vehicle._id);
     } catch (err) {
       alert("Delete failed");
     }
   };
 
+
   return (
     <div style={styles.card}>
-      <h3>{vehicle.vehicleName}</h3>
-      <p>Number: {vehicle.vehicleNumber}</p>
+      <h3>{vehicle.vehicleNumber}</h3>
       <p>Type: {vehicle.vehicleType}</p>
+      <p>Brand: {vehicle.brand}</p>
 
       <div style={styles.btnGroup}>
         <button onClick={() => navigate(`/edit-vehicle/${vehicle._id}`)}>

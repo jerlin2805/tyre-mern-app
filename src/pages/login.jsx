@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from '../services/api';
 
 function Login() {
   const [username, setUsername] = useState("");
@@ -11,23 +12,8 @@ function Login() {
 
 const handleLogin = async () => {
   try {
-    // backend expects email and password at /api/auth/login on port 5001
-    const res = await fetch("http://localhost:5001/api/auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email: username, password }),
-    });
-
-    if (!res.ok) {
-      const body = await res.text();
-      console.error('login failed', res.status, body);
-      throw new Error("Login failed");
-    }
-
-    const data = await res.json();
-    // store token and flag
+    const res = await api.post('/auth/login', { email: username, password });
+    const data = res.data || {};
     if (data.token) localStorage.setItem('token', data.token);
     localStorage.setItem("isLoggedIn", "true");
     navigate("/add-vehicle");
@@ -59,7 +45,12 @@ const handleLogin = async () => {
           style={styles.input}
         />
 
-        <button style={styles.button} onClick={handleLogin}>
+
+        <button 
+          style={styles.button} 
+          onClick={handleLogin}
+          type="button"
+        >
           Login
         </button>
 
