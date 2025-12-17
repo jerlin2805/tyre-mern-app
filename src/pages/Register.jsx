@@ -2,38 +2,60 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from '../services/api';
 
-function Login() {
-  const [username, setUsername] = useState("");
+function Register() {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
+  const handleRegister = async () => {
+    if (!name || !email || !password) {
+      setError("All fields are required");
+      return;
+    }
 
-const handleLogin = async () => {
-  try {
-    const res = await api.post('/auth/login', { email: username, password });
-    const data = res.data || {};
-    if (data.token) localStorage.setItem('token', data.token);
-    localStorage.setItem("isLoggedIn", "true");
-    navigate("/add-vehicle");
-  } catch (err) {
-    console.error(err);
-    setError("Invalid username or password");
-  }
-};
+    setLoading(true);
+    setError("");
+    setSuccess("");
 
+    try {
+      await api.post('/auth/register', { name, email, password });
+      setSuccess("Registration successful! Redirecting to login...");
+      
+      // Redirect to login after 2 seconds
+      setTimeout(() => {
+        navigate('/');
+      }, 2000);
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.message || "Registration failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div style={styles.container}>
       <div style={styles.card}>
-        <h2 style={styles.title}>Login</h2>
+        <h2 style={styles.title}>Register</h2>
 
         <input
           type="text"
-          placeholder="Email (use admin@example.com)"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          placeholder="Full Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          style={styles.input}
+        />
+
+        <input
+          type="email"
+          placeholder="Email Address"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           style={styles.input}
         />
 
@@ -45,33 +67,33 @@ const handleLogin = async () => {
           style={styles.input}
         />
 
-
-
         <button 
           style={styles.button} 
-          onClick={handleLogin}
-          type="button"
+          onClick={handleRegister}
+          disabled={loading}
         >
-          Login
+          {loading ? "Registering..." : "Register"}
         </button>
 
         <div style={styles.linkContainer}>
-          <span style={styles.linkText}>New user? </span>
+          <span style={styles.linkText}>Already have an account? </span>
           <button 
             style={styles.linkButton} 
-            onClick={() => navigate('/register')}
+            onClick={() => navigate('/')}
+            disabled={loading}
           >
-            Register here
+            Login here
           </button>
         </div>
 
         {error && <p style={styles.error}>{error}</p>}
+        {success && <p style={styles.success}>{success}</p>}
       </div>
     </div>
   );
 }
 
-export default Login;
+export default Register;
 
 const styles = {
   container: {
@@ -123,13 +145,6 @@ const styles = {
     cursor: "pointer",
   },
 
-
-  error: {
-    color: "#ff4c4c",
-    marginTop: "12px",
-    fontSize: "14px",
-  },
-
   linkContainer: {
     marginTop: "20px",
     display: "flex",
@@ -152,5 +167,17 @@ const styles = {
     fontWeight: "600",
     textDecoration: "underline",
     padding: "0",
+  },
+
+  error: {
+    color: "#ff4c4c",
+    marginTop: "12px",
+    fontSize: "14px",
+  },
+
+  success: {
+    color: "#28a745",
+    marginTop: "12px",
+    fontSize: "14px",
   },
 };

@@ -1,5 +1,7 @@
+
 import { Routes, Route } from "react-router-dom";
-import Login from "./pages/Login";
+import Login from "./pages/login";
+import Register from "./pages/Register";
 import Vehicles from "./pages/Vehicles";
 import AddVehicle from "./pages/AddVehicle";
 import EditVehicle from "./pages/EditVehicle";
@@ -9,6 +11,7 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<Login />} />
+      <Route path="/register" element={<Register />} />
 
       <Route
         path="/vehicles"
