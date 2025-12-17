@@ -18,12 +18,11 @@ router.get('/', auth, async (req, res) => {
 // POST /api/vehicles - add a vehicle
 router.post('/', auth, async (req, res) => {
   try {
+
     const {
       vehicleNumber,
       vehicleType,
       brand,
-      registrationNumber,
-      registrationExpiry,
       notes,
     } = req.body;
 
@@ -31,12 +30,11 @@ router.post('/', auth, async (req, res) => {
       return res.status(400).json({ message: 'Missing fields' });
     }
 
+
     const v = new Vehicle({
       vehicleNumber,
       vehicleType,
       brand,
-      registrationNumber,
-      registrationExpiry: registrationExpiry ? new Date(registrationExpiry) : undefined,
       notes,
       owner: req.user._id,
     });
@@ -48,11 +46,11 @@ router.post('/', auth, async (req, res) => {
   }
 });
 
+
 // PUT /api/vehicles/:id - update vehicle
 router.put('/:id', auth, async (req, res) => {
   try {
     const update = req.body;
-    if (update.registrationExpiry) update.registrationExpiry = new Date(update.registrationExpiry);
     const v = await Vehicle.findOneAndUpdate({ _id: req.params.id, owner: req.user._id }, update, { new: true });
     if (!v) return res.status(404).json({ message: 'Not found' });
     res.json(v);

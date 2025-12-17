@@ -11,8 +11,6 @@ function EditVehicle() {
     vehicleNumber: "",
     vehicleType: "",
     brand: "",
-    registrationNumber: "",
-    registrationExpiry: "",
     notes: "",
   });
 
@@ -28,10 +26,6 @@ function EditVehicle() {
           vehicleNumber: foundVehicle.vehicleNumber || "",
           vehicleType: foundVehicle.vehicleType || "",
           brand: foundVehicle.brand || "",
-          registrationNumber: foundVehicle.registrationNumber || "",
-          registrationExpiry: foundVehicle.registrationExpiry 
-            ? new Date(foundVehicle.registrationExpiry).toISOString().slice(0, 10) 
-            : "",
           notes: foundVehicle.notes || "",
         });
         if (foundVehicle.vehicleType && !["Car", "Bike", "Truck", "Other"].includes(foundVehicle.vehicleType)) {
@@ -60,8 +54,6 @@ function EditVehicle() {
       vehicleNumber: form.vehicleNumber,
       vehicleType: finalType,
       brand: form.brand,
-      registrationNumber: form.registrationNumber || undefined,
-      registrationExpiry: form.registrationExpiry || undefined,
       notes: form.notes || undefined,
     };
 
@@ -86,84 +78,157 @@ function EditVehicle() {
   return (
     <>
       <Navigation />
-      <div style={{ padding: "20px", maxWidth: "1200px", margin: "0 auto" }}>
-        <h2>Edit Vehicle</h2>
+      <div style={styles.container}>
+        <div style={styles.card}>
+          <h2 style={styles.title}>Edit Vehicle</h2>
 
-        <form onSubmit={handleSubmit}>
-          <input
-            name="vehicleNumber"
-            value={form.vehicleNumber}
-            onChange={handleChange}
-            placeholder="Vehicle Number"
-            required
-          />
-          <br />
-
-          <select 
-            name="vehicleType" 
-            value={form.vehicleType} 
-            onChange={handleChange}
-            required
-          >
-            <option value="">Select Vehicle Type</option>
-            <option value="Car">Car</option>
-            <option value="Bike">Bike</option>
-            <option value="Truck">Truck</option>
-            <option value="Other">Other</option>
-          </select>
-          <br />
-
-          {form.vehicleType === "Other" && (
+          <form onSubmit={handleSubmit}>
             <input
-              name="customType"
-              value={customType}
-              onChange={(e) => setCustomType(e.target.value)}
-              placeholder="Enter vehicle type"
+              style={styles.input}
+              name="vehicleNumber"
+              value={form.vehicleNumber}
+              onChange={handleChange}
+              placeholder="Vehicle Number"
               required
             />
-          )}
-          <br />
 
-          <input
-            name="brand"
-            value={form.brand}
-            onChange={handleChange}
-            placeholder="Brand"
-            required
-          />
-          <br />
+            <select 
+              style={styles.input}
+              name="vehicleType" 
+              value={form.vehicleType} 
+              onChange={handleChange}
+              required
+            >
+              <option value="">Select Vehicle Type</option>
+              <option value="Car">Car</option>
+              <option value="Bike">Bike</option>
+              <option value="Truck">Truck</option>
+              <option value="Other">Other</option>
+            </select>
 
-          <input
-            name="registrationNumber"
-            value={form.registrationNumber}
-            onChange={handleChange}
-            placeholder="Registration Number"
-          />
-          <br />
+            {form.vehicleType === "Other" && (
+              <input
+                style={styles.input}
+                name="customType"
+                value={customType}
+                onChange={(e) => setCustomType(e.target.value)}
+                placeholder="Enter vehicle type"
+                required
+              />
+            )}
 
-          <input
-            type="date"
-            name="registrationExpiry"
-            value={form.registrationExpiry}
-            onChange={handleChange}
-            placeholder="Registration Expiry"
-          />
-          <br />
+            <input
+              style={styles.input}
+              name="brand"
+              value={form.brand}
+              onChange={handleChange}
+              placeholder="Brand"
+              required
+            />
 
-          <textarea
-            name="notes"
-            value={form.notes}
-            onChange={handleChange}
-            placeholder="Notes"
-          />
-          <br />
+            <textarea
+              style={styles.textarea}
+              name="notes"
+              value={form.notes}
+              onChange={handleChange}
+              placeholder="Notes"
+            />
 
-          <button type="submit">Update</button>
-          <button type="button" onClick={() => navigate("/vehicles")}>Cancel</button>
-        </form>
+            <div style={styles.buttonGroup}>
+              <button type="submit" style={styles.updateButton}>
+                Update Vehicle
+              </button>
+              <button type="button" style={styles.cancelButton} onClick={() => navigate("/vehicles")}>
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </>
   );
 }
 
 export default EditVehicle;
+
+const styles = {
+  container: {
+    minHeight: "calc(100vh - 60px)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    background: "#f4f4f4",
+    padding: "20px",
+    fontFamily: "'Poppins', sans-serif",
+  },
+
+  card: {
+    background: "#ffffff",
+    padding: "40px",
+    borderRadius: "16px",
+    width: "100%",
+    maxWidth: "450px",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.12)",
+    textAlign: "center",
+  },
+
+  title: {
+    marginBottom: "20px",
+    color: "#333",
+    fontWeight: "600",
+  },
+
+  input: {
+    width: "100%",
+    padding: "12px",
+    margin: "12px 0",
+    borderRadius: "8px",
+    border: "1px solid #ccc",
+    fontSize: "14px",
+    outline: "none",
+    background: "#fff",
+  },
+
+  textarea: {
+    width: "100%",
+    padding: "12px",
+    margin: "12px 0",
+    borderRadius: "8px",
+    border: "1px solid #ccc",
+    fontSize: "14px",
+    outline: "none",
+    background: "#fff",
+    minHeight: "100px",
+    resize: "vertical",
+  },
+
+  buttonGroup: {
+    display: "flex",
+    gap: "10px",
+    marginTop: "20px",
+  },
+
+  updateButton: {
+    flex: 1,
+    padding: "12px",
+    background: "#e76995ff",
+    color: "#fff",
+    border: "none",
+    borderRadius: "8px",
+    fontSize: "16px",
+    fontWeight: "600",
+    cursor: "pointer",
+  },
+
+  cancelButton: {
+    flex: 1,
+    padding: "12px",
+    background: "#6c757d",
+    color: "#fff",
+    border: "none",
+    borderRadius: "8px",
+    fontSize: "16px",
+    fontWeight: "600",
+    cursor: "pointer",
+  },
+};

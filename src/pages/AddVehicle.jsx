@@ -7,8 +7,6 @@ function AddVehicle() {
   const [vehicleNumber, setVehicleNumber] = useState("");
   const [vehicleType, setVehicleType] = useState("");
   const [brand, setBrand] = useState("");
-  const [registrationNumber, setRegistrationNumber] = useState("");
-  const [registrationExpiry, setRegistrationExpiry] = useState("");
   
   const [message, setMessage] = useState("");
   const [vehicles, setVehicles] = useState([]);
@@ -40,8 +38,6 @@ function AddVehicle() {
       setVehicleType(v.vehicleType || '');
       setCustomType('');
       setBrand(v.brand || '');
-      setRegistrationNumber(v.registrationNumber || '');
-      setRegistrationExpiry(v.registrationExpiry ? new Date(v.registrationExpiry).toISOString().slice(0,10) : '');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [location]);
@@ -64,16 +60,12 @@ function AddVehicle() {
             vehicleNumber,
             vehicleType: finalType,
             brand,
-            registrationNumber,
-            registrationExpiry,
           });
         } else {
           res = await api.post('/vehicles', {
             vehicleNumber,
             vehicleType: finalType,
             brand,
-            registrationNumber,
-            registrationExpiry,
           });
         }
 
@@ -89,8 +81,6 @@ function AddVehicle() {
         setVehicleType('');
         setCustomType('');
         setBrand('');
-        setRegistrationNumber('');
-        setRegistrationExpiry('');
 
         // refresh list
         fetchVehicles();
@@ -109,8 +99,6 @@ function AddVehicle() {
     setVehicleType(v.vehicleType || '');
     setCustomType('');
     setBrand(v.brand || '');
-    setRegistrationNumber(v.registrationNumber || '');
-    setRegistrationExpiry(v.registrationExpiry ? new Date(v.registrationExpiry).toISOString().slice(0,10) : '');
     
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -121,8 +109,6 @@ function AddVehicle() {
     setVehicleType('');
     setCustomType('');
     setBrand('');
-    setRegistrationNumber('');
-    setRegistrationExpiry('');
     
     setMessage('');
   };
@@ -183,22 +169,6 @@ function AddVehicle() {
             style={styles.input}
           />
 
-          <input
-            type="text"
-            placeholder="Registration Number"
-            value={registrationNumber}
-            onChange={(e) => setRegistrationNumber(e.target.value)}
-            style={styles.input}
-          />
-
-          <input
-            type="date"
-            placeholder="Registration Expiry"
-            value={registrationExpiry}
-            onChange={(e) => setRegistrationExpiry(e.target.value)}
-            style={styles.input}
-          />
-
           <button style={styles.button} onClick={handleSubmit}>
             {editingId ? 'Update Vehicle' : 'Add Vehicle'}
           </button>
@@ -209,6 +179,30 @@ function AddVehicle() {
             <button style={styles.cancelButton} onClick={handleCancelEdit}>
               Cancel Edit
             </button>
+          )}
+        </div>
+
+        {/* Vehicle List */}
+        <div style={styles.vehicleList}>
+          <h3 style={styles.listTitle}>My Vehicles</h3>
+          {vehicles.length === 0 ? (
+            <p style={styles.emptyMessage}>No vehicles added yet.</p>
+          ) : (
+            vehicles.map((v) => (
+              <div key={v._id} style={styles.vehicleItem}>
+                <div style={styles.vehicleInfo}>
+                  <strong>{v.vehicleNumber}</strong> - {v.vehicleType} - {v.brand}
+                </div>
+                <div style={styles.vehicleActions}>
+                  <button style={styles.editButton} onClick={() => handleEdit(v)}>
+                    Edit
+                  </button>
+                  <button style={styles.deleteButton} onClick={() => handleDelete(v._id)}>
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))
           )}
         </div>
       </div>
@@ -223,10 +217,12 @@ const styles = {
     minHeight: "calc(100vh - 60px)",
     display: "flex",
     justifyContent: "center",
-    alignItems: "center",
+    alignItems: "flex-start",
     background: "#f4f4f4",
     padding: "20px",
     fontFamily: "'Poppins', sans-serif",
+    gap: "20px",
+    flexWrap: "wrap",
   },
 
   card: {
@@ -286,5 +282,64 @@ const styles = {
     marginTop: "15px",
     fontSize: "14px",
     color: "#28a745",
+  },
+
+  vehicleList: {
+    background: "#ffffff",
+    padding: "40px",
+    borderRadius: "16px",
+    width: "100%",
+    maxWidth: "450px",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.12)",
+  },
+
+  listTitle: {
+    marginBottom: "20px",
+    color: "#333",
+    fontWeight: "600",
+  },
+
+  emptyMessage: {
+    color: "#666",
+    textAlign: "center",
+  },
+
+  vehicleItem: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "10px 0",
+    borderBottom: "1px solid #eee",
+  },
+
+  vehicleInfo: {
+    flex: 1,
+    color: "#333",
+  },
+
+  vehicleActions: {
+    display: "flex",
+    gap: "10px",
+  },
+
+
+  editButton: {
+    background: "#e76995ff",
+    color: "#fff",
+    border: "none",
+    padding: "8px 16px",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontSize: "14px",
+  },
+
+  deleteButton: {
+    background: "#e76995ff",
+    color: "#fff",
+    border: "none",
+    padding: "8px 16px",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontSize: "14px",
   },
 };

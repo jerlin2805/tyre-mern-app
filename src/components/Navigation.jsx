@@ -13,6 +13,7 @@ function Navigation() {
     <div style={styles.navContainer}>
       <div style={styles.nav}>
         <h3 style={styles.title}>Vehicle Management System</h3>
+
         <div style={styles.buttons}>
           <button 
             style={styles.navButton} 
@@ -25,6 +26,12 @@ function Navigation() {
             onClick={() => navigate('/vehicles')}
           >
             View Vehicles
+          </button>
+          <button 
+            style={styles.navButton} 
+            onClick={() => navigate('/services')}
+          >
+            Services
           </button>
           <button 
             style={styles.logoutButton} 

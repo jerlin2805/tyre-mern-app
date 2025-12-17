@@ -1,10 +1,12 @@
 
+
 import { Routes, Route } from "react-router-dom";
 import Login from "./pages/login";
 import Register from "./pages/Register";
 import Vehicles from "./pages/Vehicles";
 import AddVehicle from "./pages/AddVehicle";
 import EditVehicle from "./pages/EditVehicle";
+import Services from "./pages/Services";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -31,11 +33,21 @@ function App() {
         }
       />
 
+
       <Route
         path="/edit-vehicle/:id"
         element={
           <ProtectedRoute>
             <EditVehicle />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/services"
+        element={
+          <ProtectedRoute>
+            <Services />
           </ProtectedRoute>
         }
       />

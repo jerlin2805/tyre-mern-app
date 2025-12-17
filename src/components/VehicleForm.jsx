@@ -1,16 +1,16 @@
 import { useState, useEffect } from "react";
 
 function VehicleForm({ onSubmit, editingVehicle, onCancel }) {
+
   const [formData, setFormData] = useState({
     vehicleNumber: "",
     vehicleType: "",
     brand: "",
-    registrationNumber: "",
-    registrationExpiry: "",
     notes: "",
   });
 
   const [customType, setCustomType] = useState("");
+
 
   useEffect(() => {
     if (editingVehicle) {
@@ -18,10 +18,6 @@ function VehicleForm({ onSubmit, editingVehicle, onCancel }) {
         vehicleNumber: editingVehicle.vehicleNumber || "",
         vehicleType: editingVehicle.vehicleType || "",
         brand: editingVehicle.brand || "",
-        registrationNumber: editingVehicle.registrationNumber || "",
-        registrationExpiry: editingVehicle.registrationExpiry
-          ? new Date(editingVehicle.registrationExpiry).toISOString().slice(0, 10)
-          : "",
         notes: editingVehicle.notes || "",
       });
       if (editingVehicle.vehicleType && !["Car", "Bike", "Truck", "Other"].includes(editingVehicle.vehicleType)) {
@@ -35,8 +31,6 @@ function VehicleForm({ onSubmit, editingVehicle, onCancel }) {
         vehicleNumber: "",
         vehicleType: "",
         brand: "",
-        registrationNumber: "",
-        registrationExpiry: "",
         notes: "",
       });
       setCustomType("");
@@ -59,16 +53,16 @@ function VehicleForm({ onSubmit, editingVehicle, onCancel }) {
       return;
     }
 
+
     const payload = {
       vehicleNumber: formData.vehicleNumber,
       vehicleType: finalType,
       brand: formData.brand,
-      registrationNumber: formData.registrationNumber || undefined,
-      registrationExpiry: formData.registrationExpiry || undefined,
       notes: formData.notes || undefined,
     };
 
     onSubmit(payload);
+
 
     // reset only when not editing
     if (!editingVehicle) {
@@ -76,8 +70,6 @@ function VehicleForm({ onSubmit, editingVehicle, onCancel }) {
         vehicleNumber: "",
         vehicleType: "",
         brand: "",
-        registrationNumber: "",
-        registrationExpiry: "",
         notes: "",
       });
       setCustomType("");
@@ -114,27 +106,13 @@ function VehicleForm({ onSubmit, editingVehicle, onCancel }) {
         />
       )}
 
+
       <input
         name="brand"
         placeholder="Brand"
         value={formData.brand}
         onChange={handleChange}
         required
-      />
-
-      <input
-        name="registrationNumber"
-        placeholder="Registration Number"
-        value={formData.registrationNumber}
-        onChange={handleChange}
-      />
-
-      <input
-        type="date"
-        name="registrationExpiry"
-        placeholder="Registration Expiry"
-        value={formData.registrationExpiry}
-        onChange={handleChange}
       />
 
       <textarea

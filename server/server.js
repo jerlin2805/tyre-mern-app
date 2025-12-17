@@ -3,8 +3,10 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
 
+
 const authRouter = require('./routes/auth');
 const vehiclesRouter = require('./routes/vehicles');
+const servicesRouter = require('./routes/services');
 
 const app = express();
 
@@ -17,10 +19,13 @@ app.get('/', (req, res) => {
   res.send('Backend is running 🚀');
 });
 
+
 // mount auth routes
 app.use('/api/auth', authRouter);
 // mount vehicle routes
 app.use('/api/vehicles', vehiclesRouter);
+// mount services routes
+app.use('/api/services', servicesRouter);
 
 
 // connect to mongo and start server

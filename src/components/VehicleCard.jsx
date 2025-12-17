@@ -23,8 +23,9 @@ function VehicleCard({ vehicle, onDelete }) {
       <p>Type: {vehicle.vehicleType}</p>
       <p>Brand: {vehicle.brand}</p>
 
+
       <div style={styles.btnGroup}>
-        <button onClick={() => navigate(`/edit-vehicle/${vehicle._id}`)}>
+        <button onClick={() => navigate(`/edit-vehicle/${vehicle._id}`)} style={styles.edit}>
           Edit
         </button>
         <button onClick={handleDelete} style={styles.delete}>
@@ -34,6 +35,7 @@ function VehicleCard({ vehicle, onDelete }) {
     </div>
   );
 }
+
 
 const styles = {
   card: {
@@ -46,8 +48,14 @@ const styles = {
     display: "flex",
     gap: "10px",
   },
+  edit: {
+    background: "#e76995ff",
+    color: "white",
+    border: "none",
+    padding: "5px 10px",
+  },
   delete: {
-    background: "#ff4d4d",
+    background: "#e76995ff",
     color: "white",
     border: "none",
     padding: "5px 10px",
